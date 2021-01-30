@@ -8,9 +8,9 @@ from typing import Iterator
 class SubjectivityLSTM(nn.Module):
     def __init__(self, vocab_dim, embedding_dim, h_dim, n_layers=1, dropout=0):
         """
-        :param in_dim: Number of input dimensions.
+        :param vocab_dim: Number of vocabulary dimensions.
         :param h_dim: Number of hidden state dimensions.
-        :param out_dim: Number of input dimensions.
+        :param embedding_dim: Number of embedding dimensions.
         :param n_layers: Number of layer in the model.
         :param dropout: Level of dropout to apply between layers. Zero
         disables.
@@ -26,11 +26,9 @@ class SubjectivityLSTM(nn.Module):
         self.linear = nn.Linear(h_dim, 3)
 
     def forward(self, x, **kw):
-        # x shape: (S, B) Note batch dim is not first!
-        embedded = self.embedding(x)  # embedded shape: (S, B, E)
 
-        # GRU first  output: all hidden states from last layer (S, B, H)
-        # GRU second output: last hidden state from each layer (L, B, H)
+        embedded = self.embedding(x)
+
         h, ht = self.lstm(embedded)
         out = self.linear(h)
 
@@ -74,7 +72,7 @@ class StanceLSTM(nn.Module):
         # ht: (L, B, H)
         h, ht = self.lstm(rnn_input, h_prev)
 
-        # Project H back to the vocab size V, to get a score per word
+        # Project H back to the output size to get prediction for the stance
         out = self.linear(h)
 
         # Out shapes: (S, B, V) and (L, B, H)
@@ -100,5 +98,5 @@ class TwoPhaseLSTM(nn.Module):
         stance_output, context = self.stance(x_src, context, h, **kw)
         y_stance = self.log_softmax(stance_output)
         y_sub = self.log_softmax(sub_output)
-        # Output shape: (S-1, B, V)
+        # Output shape: (S, B, 3)
         return y_stance, y_sub

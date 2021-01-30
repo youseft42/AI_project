@@ -1,11 +1,7 @@
-import os
-import abc
+
 import sys
 import tqdm
 import torch
-from typing import Any, Callable
-from pathlib import Path
-from torch.utils.data import DataLoader
 
 
 def train_two_phase_rnn(model, dl_train, optimizer, sub_loss_fn, stance_loss_fn, max_batches=None):
@@ -53,7 +49,6 @@ def eval_two_phase_rnn(model, dl_test):
             x, y_stance, y_sub = batch.TWEET, batch.STANCE, batch.SENTIMENT
 
             # Forward pass
-            # Output
             with torch.no_grad():
                 y_stance_hat, y_sub_hat = model(x)
 
